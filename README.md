@@ -110,7 +110,7 @@ The scripts in `examples/` can be directly run:
 
 ```bash
 python examples/wifi_plotting_xarray.py
-python examples/lorawan_parsing_xarray.py
+python examples/lorawan_parsing_example.py
 ```
 
 ## Troubleshooting ##

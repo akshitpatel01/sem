@@ -113,6 +113,20 @@ python examples/wifi_plotting_xarray.py
 python examples/lorawan_parsing_example.py
 ```
 
+## Installing SEM in pip's editable mode ##
+
+`pip` currently requires a `setup.py` file to install projects in editable mode.
+
+As explained [here](https://github.com/python-poetry/poetry/issues/761), poetry
+actually already generates a `setup.py`. After building the project, you can
+extract the file from the archive using the following command:
+
+``` bash
+tar -xvf dist/*.tar.gz --wildcards --no-anchored '*/setup.py' --strip=1
+```
+
+After this step, it becomes possible to install SEM in editable mode.
+
 ## Troubleshooting ##
 
 In case there are problems with the `pandas` installation (this will happen in

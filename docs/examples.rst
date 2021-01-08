@@ -11,7 +11,7 @@ how they leverage the facilities provided by SEM with different objectives.
 The full script is available here_. This document will only show the relevant
 portions of the code.
 
-.. _here: https://github.com/DvdMgr/sem/blob/master/examples/wifi_plotting_xarray.py
+.. _here: https://github.com/signetlabdei/sem/blob/master/examples/wifi_plotting_xarray.py
 
 This example showcases how SEM's integration with the `xarray` python library
 can be leveraged to quickly obtain plots.
@@ -137,15 +137,15 @@ plots multiple lines (one for each combination of the values) when
 `lorawan_parsing_example.py`
 ----------------------------
 
-The full script is available here_. This document will only show the relevant
+Script link_. This document will only show the relevant
 portions of the code.
 
-.. _here: https://github.com/DvdMgr/sem/blob/master/examples/lorawan_parsing_example.py
+.. _link: https://github.com/signetlabdei/sem/blob/master/examples/lorawan_parsing_example.py
 
 The `lorawan_parsing_example.py` script first shows how to use SEM to run
 simulations and plot results of single runs, and then shows how to use the
 `xarray` exporting function in conjunction with a custom-written function in
-order to extract and visualize multiple metrics at once::
+order to extract and visualize multiple metrics at once.
 
 After running some simulations of a LoRaWAN network [#]_, the script focuses on
 one single result, obtained through the

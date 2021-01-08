@@ -1,6 +1,7 @@
 language: python
 
-sudo: required
+os: linux
+
 dist: xenial
 
 python:
@@ -8,8 +9,7 @@ python:
   - "3.7"
   - "3.8"
   - "3.9"
-
-sourceline: "ppa:ubuntu-toolchain-r/test"
+  - "nightly"
 
 compiler: clang
 
@@ -21,6 +21,7 @@ install:
   - pip install poetry codecov
   - poetry build
   - poetry install
+
 script:
   - travis_wait 40 poetry run pytest --doctest-glob='*.rst' docs/ # Check .rst documentation
   - travis_wait 40 poetry run pytest -x --doctest-modules --cov=sem/ # Check code and docstrings

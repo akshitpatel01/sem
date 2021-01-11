@@ -164,7 +164,7 @@ def get_and_compile_ns_3():
 #########################################################################
 
 
-@pytest.yield_fixture(autouse=True, scope='function')
+@pytest.fixture(autouse=True, scope='function')
 def setup_and_cleanup(tmpdir):
     yield
     shutil.rmtree(str(tmpdir))

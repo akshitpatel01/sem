@@ -7,6 +7,7 @@ import re
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
+import seaborn as sns
 
 
 #######################
@@ -58,12 +59,12 @@ def get_average_throughput(result):
     stdout = result['output']['stdout']
     m = re.match('.*throughput: [-+]?([0-9]*\.?[0-9]+).*', stdout,
                     re.DOTALL).group(1)
-    return float(m)
+    return [float(m)]
 
 # Reduce multiple runs to a single value (or tuple)
 results = campaign.get_results_as_xarray(params,
                                          get_average_throughput,
-                                         'AvgThroughput', runs)
+                                         ['AvgThroughput'], runs)
 
 # We can then visualize the object that is returned by the function
 print(results)
@@ -89,21 +90,8 @@ for useShortGuardInterval in params['useShortGuardInterval']:
         plt.legend(legend_entries)
         plt.xlabel('MCS')
         plt.ylabel('Throughput [Mbit/s]')
-        plt.savefig(os.path.join(figure_path, 'throughput.png'))
+        plt.savefig('throughput.png')
 
-# Assess the influence of nWifi and distance parameters
-plt.figure(figsize=[8, 8], dpi=300)
-subplot_idx = 1
-for nWifi in params['nWifi']:
-    for distance in params['distance']:
-        stacked_params = results.sel(
-            nWifi=nWifi,
-            distance=distance,
-            channelWidth='20',
-            simulationTime=4).stack(
-                sgi_rts=('useShortGuardInterval', 'useRts')
-            ).reduce(np.mean, 'runs')
-        plt.subplot(2, 2, subplot_idx)
-        stacked_params.plot.line(x='mcs', add_legend=True)
-        subplot_idx += 1
-        plt.savefig(os.path.join(figure_path, 'throughputComparison.png'))
+results_df = campaign.get_results_as_dataframe(get_average_throughput, ['AvgThroughput'])
+sns.catplot(x='distance', y='AvgThroughput', data=results_df, kind='boxen')
+plt.show()

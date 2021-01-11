@@ -1,5 +1,3 @@
-# %load_ext autoreload
-# %autoreload 2
 # This is an example showing how to use the ns-3 SimulationExecutionManager to
 # get from compilation to result visualization.
 
@@ -9,7 +7,6 @@ import re
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
-
 
 #######################
 # Create the campaign #

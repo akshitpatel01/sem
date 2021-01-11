@@ -122,8 +122,8 @@ The documentation of the current version of the package is also available on
 The scripts in `examples/` can be directly run:
 
 ```bash
-python examples/wifi_plotting_xarray.py
-python examples/lorawan_parsing_example.py
+python examples/wifi_example.py
+python examples/lorawan_example.py
 ```
 
 ## Installing SEM in pip's editable mode ##

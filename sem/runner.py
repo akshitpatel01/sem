@@ -219,7 +219,6 @@ class SimulationRunner(object):
         if len(options):
             parsed = {}
             for line in options[0].splitlines():
-                print(line)
                 key = re.findall(r'.*--(.*?)[?::|=].*', line)
                 value = re.findall(r'.*\[(.*?)]', line)
                 if key:

@@ -4,6 +4,7 @@ import re
 import subprocess
 import time
 import uuid
+import sem.utils
 
 from tqdm import tqdm
 
@@ -294,11 +295,8 @@ class SimulationRunner(object):
                                               stderr=stderr_file)
             end = time.time()  # Time execution
 
-            if return_code > 0:
-                complete_command = [self.script]
-                complete_command.extend(command[1:])
-                complete_command = "python3 waf --run \"%s\"" % (
-                    ' '.join(complete_command))
+            if return_code != 0:
+                complete_command = sem.utils.get_command_from_result(self.script, current_result)
 
                 with open(stdout_file_path, 'r') as stdout_file, open(
                         stderr_file_path, 'r') as stderr_file:
@@ -308,9 +306,12 @@ class SimulationRunner(object):
                                      'Stdout: %s\n'
                                      'Use this command to reproduce:\n'
                                      '%s'
-                                     % (parameter, stderr_file.read(),
-                                        stdout_file.read(), complete_command)))
+                                     % (parameter,
+                                        stderr_file.read(),
+                                        stdout_file.read(),
+                                        complete_command)))
 
             current_result['meta']['elapsed_time'] = end-start
+            current_result['meta']['exitcode'] = return_code
 
             yield current_result

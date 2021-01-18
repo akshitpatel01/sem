@@ -123,7 +123,6 @@ The scripts in `examples/` can be directly run:
 
 ```bash
 python examples/wifi_example.py
-python examples/lorawan_example.py
 ```
 
 ## Installing SEM in pip's editable mode ##

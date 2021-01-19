@@ -255,7 +255,7 @@ class SimulationRunner(object):
     # Simulation running #
     ######################
 
-    def run_simulations(self, parameter_list, data_folder):
+    def run_simulations(self, parameter_list, data_folder, stop_on_errors=False):
         """
         Run several simulations using a certain combination of parameters.
 

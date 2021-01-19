@@ -265,7 +265,7 @@ class CampaignManager(object):
     # Simulation running #
     ######################
 
-    def run_simulations(self, param_list, show_progress=True):
+    def run_simulations(self, param_list, show_progress=True, stop_on_errors=True):
         """
         Run several simulations specified by a list of parameter combinations.
 
@@ -313,7 +313,8 @@ class CampaignManager(object):
         # Note that this only creates a generator for the results, no
         # computation is performed on this line.
         results = self.runner.run_simulations(param_list,
-                                              self.db.get_data_dir())
+                                              self.db.get_data_dir(),
+                                              stop_on_errors=stop_on_errors)
 
         # Wrap the result generator in the progress bar generator.
         if show_progress:
@@ -425,7 +426,8 @@ class CampaignManager(object):
         return params_to_simulate
 
     def run_missing_simulations(self, param_list, runs=None,
-                                condition_checking_function=None):
+                                condition_checking_function=None,
+                                stop_on_errors=True):
         """
         Run the simulations from the parameter list that are not yet available
         in the database.
@@ -457,13 +459,13 @@ class CampaignManager(object):
                                    self.runner.script,
                                    self.runner.optimized)
             # Set up the runner's stopping condition function
-            cr.stopping_function = lambda x: condition_checking_function(self,
-                                                                         x)
+            cr.stopping_function = lambda x: condition_checking_function(self, x)
             # Set up the runner's iterator for next runs
             cr.next_runs = next_runs
 
             self.run_and_save_results(cr.run_simulations(param_list,
-                                                         self.db.get_data_dir()),
+                                                         self.db.get_data_dir(),
+                                                         stop_on_errors=stop_on_errors),
                                       batch_results=False)
 
         # Otherwise, we just run all required runs for each combination
@@ -473,10 +475,12 @@ class CampaignManager(object):
                 self.run_simulations(
                     self.get_missing_simulations(param_list,
                                                  runs,
-                                                 with_time_estimate=True))
+                                                 with_time_estimate=True),
+                    stop_on_errors=stop_on_errors)
             else:
                 self.run_simulations(
-                    self.get_missing_simulations(param_list, runs))
+                    self.get_missing_simulations(param_list, runs),
+                    stop_on_errors=stop_on_errors)
 
     #####################
     # Result management #

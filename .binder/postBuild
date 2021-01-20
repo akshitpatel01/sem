@@ -1,2 +1,2 @@
-set -ex
+poetry install
 poetry run sem build --ns-3-path examples/ns-3 --results-dir examples/results --script wifi-multi-tos

@@ -3,12 +3,10 @@
 
 import sem
 import os
-import re
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
 import seaborn as sns
-
 
 #######################
 # Create the campaign #
@@ -20,8 +18,7 @@ campaign_dir = "/tmp/sem-test/wifi-plotting-example"
 
 campaign = sem.CampaignManager.new(ns_path, script, campaign_dir,
                                    runner_type='ParallelRunner',
-                                   overwrite=True,
-                                   check_repo=False)
+                                   max_parallel_processes=8)
 
 print(campaign)  # This prints out the campaign settings
 
@@ -32,66 +29,44 @@ print(campaign)  # This prints out the campaign settings
 # These are the available parameters
 # We specify each parameter as an array containing the desired values
 params = {
-    'nWifi': [1, 3],
-    'distance': [1, 10],
-    'useRts': ['false', 'true'],
-    'useShortGuardInterval': ['false', 'true'],
-    'mcs': list(range(2, 8, 2)),
-    'channelWidth': ['20'],
-    'simulationTime': [4],
+    'nWifi': [1],  # Number of STAs
+    'distance': list(range(0, 110, 10)),  # Distance from AP
+    'useRts': [True],  # Enable RTS/CTS
+    'useShortGuardInterval': [True],  # Use the short guard interval
+    'mcs': list(range(0, 8, 2)),  # Modulation Coding Scheme to use
+    'channelWidth': [20],  # Channel width
+    'simulationTime': [4],  # How long to simulate for
 }
-runs = 2  # Number of runs to perform for each combination
+runs = 10  # Number of runs to perform for each combination
 
 # Actually run the simulations
 # This will also print a progress bar
-campaign.run_missing_simulations(
-    sem.list_param_combinations(params),
-    runs=runs)
+campaign.run_missing_simulations(params, runs=runs)
 
 ##################################
 # Exporting and plotting results #
 ##################################
 
-# We need to define a function to parse the results. This function will
-# then be passed to the get_results_as_xarray function, that will call it
-# on every result it needs to export.
+# We need to define a function to parse the results. This function will then be
+# passed to get_results_as_dataframe, that will call it on every result it needs
+# to export.
 def get_average_throughput(result):
-    stdout = result['output']['stdout']
-    m = re.match('.*throughput: [-+]?([0-9]*\.?[0-9]+).*', stdout,
-                    re.DOTALL).group(1)
-    return [float(m)]
+    if result['meta']['exitcode'] == 0:
+        throughput = float(result['output']['stdout'].split(" ")[-2])
+    else:
+        throughput = 0
+    return [throughput]
+throughput_labels = ['Throughput']
 
-# Reduce multiple runs to a single value (or tuple)
-results = campaign.get_results_as_xarray(params,
-                                         get_average_throughput,
-                                         ['AvgThroughput'], runs)
+# Use the parsing function to create a Pandas dataframe
+results = campaign.get_results_as_dataframe(get_average_throughput,
+                                            throughput_labels,
+                                            drop_columns=True)
 
-# We can then visualize the object that is returned by the function
-print(results)
-
-# Statistics can easily be computed from the xarray structure
-results_average = results.reduce(np.mean, 'runs')
-results_std = results.reduce(np.std, 'runs')
-
-# Plot lines with error bars
-plt.figure(figsize=[6, 6], dpi=100)
-legend_entries = []
-for useShortGuardInterval in params['useShortGuardInterval']:
-    for useRts in params['useRts']:
-        avg = results_average.sel(nWifi=1, distance=1,
-                                    useShortGuardInterval=useShortGuardInterval,
-                                    useRts=useRts)
-        std = results_std.sel(nWifi=1, distance=1,
-                                useShortGuardInterval=useShortGuardInterval,
-                                useRts=useRts)
-        plt.errorbar(x=params['mcs'], y=np.squeeze(avg), yerr=6*np.squeeze(std))
-        legend_entries += ['SGI = %s, RTS = %s' %
-                            (useShortGuardInterval, useRts)]
-        plt.legend(legend_entries)
-        plt.xlabel('MCS')
-        plt.ylabel('Throughput [Mbit/s]')
-        plt.savefig('throughput.png')
-
-results_df = campaign.get_results_as_dataframe(get_average_throughput, ['AvgThroughput'])
-sns.catplot(x='distance', y='AvgThroughput', data=results_df, kind='boxen')
+# Plot contents of the dataframe using Seaborn
+sns.catplot(x='distance',
+            y='Throughput',
+            hue='mcs',
+            data=results,
+            kind='point')
 plt.show()

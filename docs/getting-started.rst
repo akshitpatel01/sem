@@ -103,14 +103,13 @@ simulations both for the `true` and `false` values of the `useRts` parameter::
   ...     'nWifi': 1,
   ...     'distance': 1,
   ...     'simulationTime': 10,
-  ...     'useRts': ['false', 'true'],
+  ...     'useRts': [False, True],
   ...     'mcs': 7,
   ...     'channelWidth': 20,
-  ...     'useShortGuardInterval': 'false'
+  ...     'useShortGuardInterval': False
   ... }
-  >>> campaign.run_missing_simulations(
-  ...     sem.list_param_combinations(param_combinations),
-  ...     runs=1)
+  >>> campaign.run_missing_simulations(param_combinations,
+  ...                                  runs=1)
 
   Running simulations: 100% 1/1 [00:09<00:00,  9.63s/simulation]
 
@@ -144,9 +143,8 @@ dictionary, ranging the `mcs` parameter from 0 to 7 and turning on and off the
   ...     'channelWidth': 20,
   ...     'useShortGuardInterval': ['false', 'true']
   ... }
-  >>> campaign.run_missing_simulations(
-  ...             sem.list_param_combinations(param_combinations),
-  ...             runs=2)
+  >>> campaign.run_missing_simulations(param_combinations,
+  ...                                  runs=2)
 
   Running simulations: 100% 32/32 [02:57<00:00,  3.86s/simulation]
 

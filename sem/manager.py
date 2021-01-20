@@ -486,6 +486,79 @@ class CampaignManager(object):
     # Result management #
     #####################
 
+    def get_results_as_dataframe(self,
+                                 result_parsing_function,
+                                 columns,
+                                 params=None,
+                                 function_yields_multiple_results=False,
+                                 runs=None,
+                                 drop_columns=False):
+        """
+        Return a Pandas DataFrame containing results parsed using a
+        user-specified function.
+
+        If function_yields_multiple_results if False, result_parsing_function is
+        expected to return a list of outputs for each parsed result, and column
+        should contain an equal number of labels describing the contents of the
+        output list.
+
+        If function_yields_multiple_results is True, instead,
+        result_parsing_function is expected to return multiple lists of outputs,
+        as described by the labels in columns, for each result. In this case,
+        each result in the database will yield a number of rows in the output
+        dataframe that is equal to the length of the result_parsing_function
+        output computed on that result.
+
+        Args:
+            result_parsing_function (function): user-defined function, taking a
+                result dictionary as input and returning a list of outputs or a list
+                of lists of outputs.
+        """
+
+        if runs is not None:
+            results_list = []
+            param_values_to_skip = []
+            all_results = self.db.get_results()
+            for r in all_results:
+                params_no_rngrun = {k:v for k, v in r['params'].items() if k != "RngRun"}
+                param_values = list(params_no_rngrun.values())
+                # Check if we should skip this item
+                if any([values_to_skip == param_values for values_to_skip in param_values_to_skip]):
+                    continue
+                # If not, add the values in the list of values to skip
+                param_values_to_skip += [param_values]
+                # Query the database for all results with the current parameter
+                # combination, and only put the first runs results in the
+                # results_list
+                results_list += self.db.get_complete_results(params_no_rngrun)[:runs]
+        else:
+            results_list = self.db.get_complete_results()
+
+        data = []
+        for result in results_list:
+            if function_yields_multiple_results:
+                for r in result_parsing_function(result):
+                    param_values = list(copy.deepcopy(result['params']).values())
+                    param_values += [r] if not isinstance(r, list) else r
+                    data += [param_values]
+            else:
+                param_values = list(copy.deepcopy(result['params']).values())
+                parsed = result_parsing_function(result)
+                param_values += [parsed] if not isinstance(parsed, list) else parsed
+                data += [param_values]
+
+        df = pd.DataFrame(data,
+                            columns=(list(self.db.get_results()[0]['params'].keys())
+                                    + columns))
+
+        if drop_columns:
+            nunique = df.apply(pd.Series.nunique)
+            cols_to_drop = nunique[nunique == 1].index
+            df = df.drop(cols_to_drop, axis=1)
+            return df
+        else:
+            return df
+
     def get_results_as_numpy_array(self, parameter_space,
                                    result_parsing_function, runs=None,
                                    extract_complete_results=True,
@@ -512,76 +585,6 @@ class CampaignManager(object):
 
         data, max_runs = self.fill_with_nan(data)
         return np.array(data)
-
-
-    def get_results_as_dataframe(self, result_parsing_function, columns,
-                                 params=None,
-                                 results_on_same_row=True,
-                                 function_yields_multiple_results=False, runs=None,
-                                 drop_columns=False):
-
-        if runs is not None:
-            results_list = []
-            param_values_to_skip = []
-            all_results = self.db.get_results()
-            for r in all_results:
-                params_no_rngrun = {k:v for k, v in r['params'].items() if k != "RngRun"}
-                param_values = list(params_no_rngrun.values())
-                # Check if we should skip this item
-                if any([values_to_skip == param_values for values_to_skip in param_values_to_skip]):
-                    continue
-                # If not, add the values in the list of values to skip
-                param_values_to_skip += [param_values]
-                # Query the database for all results with the current parameter
-                # combination, and only put the first runs results in the
-                # results_list
-                results_list += self.db.get_complete_results(params_no_rngrun)[:runs]
-        else:
-            results_list = self.db.get_complete_results()
-
-        data = []
-        for result in results_list:
-            if results_on_same_row:
-                if function_yields_multiple_results:
-                    for r in result_parsing_function(result):
-                        param_values = list(copy.deepcopy(result['params']).values())
-                        param_values += r
-                        data += [param_values]
-                else:
-                    param_values = list(copy.deepcopy(result['params']).values())
-                    param_values += result_parsing_function(result)
-                    data += [param_values]
-            else:
-                if function_yields_multiple_results:
-                    for r in result_parsing_function(result):
-                        param_values = list(copy.deepcopy(result['params']).values())
-                        param_values += [r]
-                        data += [param_values]
-                else:
-                    for output_idx, output in enumerate(result_parsing_function(result)):
-                        param_values = list(copy.deepcopy(result['params']).values())
-                        param_values += [columns[output_idx]]
-                        param_values += [output]
-                        data += [param_values]
-
-        if results_on_same_row:
-            df = pd.DataFrame(data,
-                              columns=(list(self.db.get_results()[0]['params'].keys())
-                                       + columns))
-        else:
-            df = pd.DataFrame(data,
-                              columns=(list(self.db.get_results()[0]['params'].keys())
-                                       + ['output', 'value']))
-
-
-
-        if drop_columns:
-            nunique = df.apply(pd.Series.nunique)
-            cols_to_drop = nunique[nunique == 1].index
-            df = df.drop(cols_to_drop, axis=1)
-            return df
-        else:
-            return df
 
     def save_to_mat_file(self, parameter_space,
                          result_parsing_function,

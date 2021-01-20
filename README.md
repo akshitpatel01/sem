@@ -140,16 +140,6 @@ tar -xvf dist/*.tar.gz --wildcards --no-anchored '*/setup.py' --strip=1
 
 After this step, it becomes possible to install SEM in editable mode.
 
-## Troubleshooting ##
-
-In case there are problems with the `pandas` installation (this will happen in
-macOS, for which no binaries are provided), use the following command for
-installation (and see [this pandas
-issue](https://github.com/pandas-dev/pandas/issues/20775) as a reference):
-
-```bash
-PIP_NO_BUILD_ISOLATION=false pipenv install
-```
 
 ## Authors ##
 

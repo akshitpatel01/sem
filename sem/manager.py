@@ -515,24 +515,26 @@ class CampaignManager(object):
                 of lists of outputs.
         """
 
-        if runs is not None:
-            results_list = []
-            param_values_to_skip = []
-            all_results = self.db.get_results()
-            for r in all_results:
-                params_no_rngrun = {k:v for k, v in r['params'].items() if k != "RngRun"}
-                param_values = list(params_no_rngrun.values())
-                # Check if we should skip this item
-                if any([values_to_skip == param_values for values_to_skip in param_values_to_skip]):
-                    continue
-                # If not, add the values in the list of values to skip
-                param_values_to_skip += [param_values]
-                # Query the database for all results with the current parameter
-                # combination, and only put the first runs results in the
-                # results_list
-                results_list += self.db.get_complete_results(params_no_rngrun)[:runs]
-        else:
-            results_list = self.db.get_complete_results()
+        # XXX Fix this
+        # if runs is not None:
+        #     results_list = []
+        #     param_values_to_skip = []
+        #     all_results = self.db.get_results()
+        #     for r in all_results:
+        #         params_no_rngrun = {k:v for k, v in r['params'].items() if k != "RngRun"}
+        #         param_values = list(params_no_rngrun.values())
+        #         # Check if we should skip this item
+        #         if any([values_to_skip == param_values for values_to_skip in param_values_to_skip]):
+        #             continue
+        #         # If not, add the values in the list of values to skip
+        #         param_values_to_skip += [param_values]
+        #         # Query the database for all results with the current parameter
+        #         # combination, and only put the first runs results in the
+        #         # results_list
+        #         results_list += self.db.get_complete_results(params_no_rngrun)[:runs]
+        # else:
+        #     results_list = self.db.get_complete_results()
+        results_list = self.db.get_complete_results(params)
 
         data = []
         for result in results_list:

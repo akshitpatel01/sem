@@ -137,3 +137,16 @@ def test_save_to_folders(tmpdir, manager, result, parameter_combination_range):
     manager.save_to_folders(parameter_combination_range,
                             str(tmpdir.join('folder_export')),
                             2)
+
+
+# def test_folder_with_user_files(ns_3_compiled, config, manager, result):
+#     # Insert a result in the already available sem.CampaignManager
+#     #manager.db.insert_result(result)
+#     os.mknod(os.path.join(config['campaign_dir'],'user.txt'))
+#     # Try creating a new sem.CampaignManager with the same settings and
+#     # different script. This should fail.
+#     with pytest.raises(ValueError):
+#         sem.CampaignManager.new(ns_3_compiled,
+#                                 'hello-simulator',
+#                                 config['campaign_dir'],
+#                                 overwrite=True)                            

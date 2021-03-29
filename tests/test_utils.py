@@ -49,3 +49,8 @@ def test_automatic_parser(result):
     assert np.all(parsed['stdout'] == [[1, 2, 3, 4, 5],
                                        [6, 7, 8, 9, 10]])
     assert parsed['stderr'] == []
+
+# def test_get_command_from_result(ns_3_compiled,config,result):
+#     cmd = get_command_from_result(config['script'],result)
+#     print(cmd)
+

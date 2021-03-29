@@ -1,6 +1,7 @@
 from sem import SimulationRunner, ParallelRunner
 import os
 import pytest
+from shutil import copyfile
 
 ###################
 # Runner creation #
@@ -53,7 +54,23 @@ def test_script_without_args(ns_3_compiled):
 
 
 def test_empty_param_list(ns_3_compiled, config, parameter_combination):
-    runner = SimulationRunner(ns_3_compiled, 'error-throwing-example')
+    with pytest.raises(ValueError):
+        runner = SimulationRunner(ns_3_compiled, 'error-throwing-example')
     data_dir = os.path.join(config['campaign_dir'], 'data')
     with pytest.raises(Exception):
         list(runner.run_simulations([parameter_combination], data_dir))
+
+def test_multiple_files_present(ns_3_compiled, config):
+    data_dir = os.path.join(config['campaign_dir'],'data')
+    copyfile(os.path.join(ns_3_compiled,'src/core/examples/sample-random-variable.cc'), os.path.join(ns_3_compiled,'scratch/sample-random-variable.cc'))
+    ParallelRunner(ns_3_compiled, 'sample-random-variable')
+
+def test_ns3_build_fail(ns_3_compiled, config):
+    data_dir = os.path.join(config['campaign_dir'],'data')
+    #copyfile(os.path.join(ns_3_compiled,'src/core/examples/sample-random-variable.cc'), os.path.join(ns_3_compiled,'scratch/sample-random-variable.cc'))
+    with open(os.path.join(ns_3_compiled, 'src/core/examples/hash-example.cc'),
+              'a') as example:
+        example.write('Garbage')
+    with pytest.raises(Exception):
+        ParallelRunner(ns_3_compiled, config['script'])
+

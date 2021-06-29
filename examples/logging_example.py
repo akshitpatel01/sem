@@ -1,3 +1,4 @@
+from sem import utils
 import sem
 
 #######################
@@ -37,11 +38,11 @@ params = {
 }
 # Log Component in both formats
 
-log_component = {
-    'PowerAdaptationDistance': 'debug',
-    'ParfWifiManager': 'info'
-}
-# log_component = 'NS_LOG="PowerAdaptationDistance=debug:ParfWifiManager=info"'
+# log_component = {
+#     'PowerAdaptationDistance': 'debug',
+#     'ParfWifiManager': 'info'
+# }
+log_component = 'NS_LOG="PowerAdaptationDistance=debug:ParfWifiManager=info"'
 runs = 1  # Number of runs to perform for each combination
 
 # Actually run the simulations
@@ -52,6 +53,8 @@ log_path = campaign.run_missing_simulations(
 
 if log_path:
     print(log_path)
+    db = utils.process_logs(log_path[0])
+    print(db.table('logs').all())
 
 log_component = {"PowerAdaptationDistance": 'debug'}
 print("Testing log_component: %s" % log_component)

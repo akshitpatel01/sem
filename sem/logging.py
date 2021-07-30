@@ -341,7 +341,7 @@ def filter_logs(db,
         query = where('time') <= float(time_end)
         query_final.append(query)
 
-    if query_final is not None:
+    if query_final != []:
         query = reduce(and_, query_final)
         return [dict(i) for i in db.table('logs').search(query)]
     else:
